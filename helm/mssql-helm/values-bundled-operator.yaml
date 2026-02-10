@@ -1,0 +1,32 @@
+operator:
+  enabled: true
+  serviceAccount:
+    create: true
+  rbac:
+    create: true
+
+autoBackup:
+  enabled: true
+  mode: local_pvc
+  logBackupIntervalMinutes: 5
+  storage:
+    managePVC: false
+    manageSourcePVC: false
+    manageBackupPVC: true
+    manageTargetPVC: true
+    sourceData:
+      pvcName: ""
+      storageClassName: ""
+      size: ""
+      accessModes: []
+    backupData:
+      pvcName: ""
+      storageClassName: ""
+      size: 100Gi
+      accessModes:
+        - ReadWriteOnce
+    targetData:
+      storageClassName: ""
+      size: 50Gi
+      accessModes:
+        - ReadWriteOnce

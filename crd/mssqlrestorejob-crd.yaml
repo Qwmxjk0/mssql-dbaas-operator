@@ -1,0 +1,75 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: mssqlrestorejobs.dbaas.cozy.io
+spec:
+  group: dbaas.cozy.io
+  scope: Namespaced
+  names:
+    plural: mssqlrestorejobs
+    singular: mssqlrestorejob
+    kind: MSSQLRestoreJob
+    shortNames:
+      - mssqlrj
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          required: [spec]
+          properties:
+            spec:
+              type: object
+              required: [policyRef, targetTime, newInstanceName]
+              properties:
+                policyRef:
+                  type: object
+                  required: [name]
+                  properties:
+                    name: { type: string }
+                    namespace: { type: string }
+                targetTime:
+                  type: string
+                  description: "UTC time for PITR"
+                newInstanceName:
+                  type: string
+                targetConnection:
+                  type: object
+                  properties:
+                    host:
+                      type: string
+                    port:
+                      type: integer
+                    user:
+                      type: string
+                    passwordSecretRef:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        key:
+                          type: string
+                databases:
+                  type: array
+                  items: { type: string }
+                targetStorage:
+                  type: object
+                  properties:
+                    pvcName:
+                      type: string
+                    storageClassName:
+                      type: string
+                    size:
+                      type: string
+                    accessModes:
+                      type: array
+                      items:
+                        type: string
+            status:
+              type: object
+              properties:
+                phase: { type: string }
+                message: { type: string }
+                lastAppliedLogTime: { type: string }

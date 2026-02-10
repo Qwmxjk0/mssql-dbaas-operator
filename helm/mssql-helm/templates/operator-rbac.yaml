@@ -1,0 +1,49 @@
+{{- if and .Values.operator.enabled .Values.operator.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "mssql-helm.operatorServiceAccountName" . }}
+  labels:
+    {{- include "mssql-helm.labels" . | nindent 4 }}
+{{- end }}
+---
+{{- if and .Values.operator.enabled .Values.operator.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "mssql-helm.operatorServiceAccountName" . }}
+  labels:
+    {{- include "mssql-helm.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["dbaas.cozy.io"]
+    resources:
+      - mssqlinstances
+      - mssqlrestorerequests
+      - mssqlbackuppolicies
+      - mssqlbackups
+      - mssqlrestorejobs
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["batch"]
+    resources:
+      - cronjobs
+      - jobs
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources:
+      - persistentvolumeclaims
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "mssql-helm.operatorServiceAccountName" . }}
+  labels:
+    {{- include "mssql-helm.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "mssql-helm.operatorServiceAccountName" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "mssql-helm.operatorServiceAccountName" . }}
+{{- end }}

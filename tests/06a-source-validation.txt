@@ -1,0 +1,14 @@
+mesg: ttyname failed: Inappropriate ioctl for device
+Changed database context to 'db1'.
+dbname                                                                                                                           seed_cnt    wave1_cnt   wave2_cnt  
+-------------------------------------------------------------------------------------------------------------------------------- ----------- ----------- -----------
+db1                                                                                                                                        1           1           1
+Changed database context to 'db2'.
+dbname                                                                                                                           seed_cnt    wave1_cnt   wave2_cnt  
+-------------------------------------------------------------------------------------------------------------------------------- ----------- ----------- -----------
+db2                                                                                                                                        1           1           1
+Changed database context to 'db3'.
+dbname                                                                                                                           seed_cnt    wave1_cnt   wave2_cnt  
+-------------------------------------------------------------------------------------------------------------------------------- ----------- ----------- -----------
+db3                                                                                                                                        1           1           1
+pod "sqlcmd-validate-src" deleted from dbaas-mssql-rt namespace

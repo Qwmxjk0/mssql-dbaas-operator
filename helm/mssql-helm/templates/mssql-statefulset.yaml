@@ -1,0 +1,63 @@
+{{- if .Values.mssql.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mssql-helm.dbName" . }}
+  labels:
+    {{- include "mssql-helm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mssql
+spec:
+  serviceName: {{ include "mssql-helm.dbName" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "mssql-helm.name" . }}
+      app.kubernetes.io/component: mssql
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "mssql-helm.name" . }}
+        app.kubernetes.io/component: mssql
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: mssql
+          image: "{{ .Values.mssql.image.repository }}:{{ .Values.mssql.image.tag }}"
+          imagePullPolicy: {{ .Values.mssql.image.pullPolicy }}
+          ports:
+            - name: tds
+              containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_PID
+              value: "Developer"
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mssql-helm.saSecretName" . }}
+                  key: {{ .Values.mssql.auth.saPasswordKey }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/opt/mssql
+          {{- with .Values.mssql.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "mssql-helm.labels" . | nindent 10 }}
+          app.kubernetes.io/component: mssql-data
+      spec:
+        accessModes:
+          {{- toYaml .Values.mssql.persistence.accessModes | nindent 10 }}
+        {{- if .Values.mssql.persistence.storageClass }}
+        storageClassName: {{ .Values.mssql.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.mssql.persistence.size }}
+{{- end }}

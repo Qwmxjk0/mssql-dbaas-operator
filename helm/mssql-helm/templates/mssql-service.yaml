@@ -1,0 +1,17 @@
+{{- if .Values.mssql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mssql-helm.dbName" . }}
+  labels:
+    {{- include "mssql-helm.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "mssql-helm.name" . }}
+    app.kubernetes.io/component: mssql
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: tds
+      port: {{ .Values.mssql.service.port }}
+      targetPort: tds
+{{- end }}

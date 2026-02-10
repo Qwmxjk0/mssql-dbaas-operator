@@ -1,0 +1,70 @@
+{{- if .Values.autoBackup.enabled }}
+apiVersion: dbaas.cozy.io/v1alpha1
+kind: MSSQLInstance
+metadata:
+  name: {{ include "mssql-helm.instanceName" . }}
+  labels:
+    {{- include "mssql-helm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup-policy
+spec:
+  connection:
+    host: {{ include "mssql-helm.dbName" . }}
+    port: {{ .Values.mssql.service.port }}
+    user: sa
+    passwordSecretRef:
+      name: {{ include "mssql-helm.saSecretName" . }}
+      key: {{ .Values.mssql.auth.saPasswordKey }}
+  allDatabases: {{ .Values.autoBackup.allDatabases }}
+  {{- if .Values.autoBackup.databases }}
+  databases:
+    {{- toYaml .Values.autoBackup.databases | nindent 4 }}
+  {{- end }}
+  retentionDays: {{ .Values.autoBackup.retentionDays }}
+  fullBackupSchedule: {{ .Values.autoBackup.fullBackupSchedule | quote }}
+  logBackupIntervalMinutes: {{ .Values.autoBackup.logBackupIntervalMinutes }}
+  mode: {{ .Values.autoBackup.mode }}
+  dryRun: {{ .Values.autoBackup.dryRun }}
+  executor:
+    image: "{{ .Values.operator.executor.image }}:{{ .Values.operator.executor.tag }}"
+    imagePullPolicy: {{ .Values.operator.executor.pullPolicy }}
+  targets:
+    rpoTarget: {{ .Values.autoBackup.targets.rpoTarget | quote }}
+    rtoTarget: {{ .Values.autoBackup.targets.rtoTarget | quote }}
+  storage:
+    managePVC: {{ .Values.autoBackup.storage.managePVC }}
+    manageSourcePVC: {{ .Values.autoBackup.storage.manageSourcePVC }}
+    manageBackupPVC: {{ .Values.autoBackup.storage.manageBackupPVC }}
+    manageTargetPVC: {{ .Values.autoBackup.storage.manageTargetPVC }}
+    sourceData:
+      pvcName: {{ include "mssql-helm.sourcePVCName" . }}
+      storageClassName: {{ default .Values.mssql.persistence.storageClass .Values.autoBackup.storage.sourceData.storageClassName | quote }}
+      size: {{ default .Values.mssql.persistence.size .Values.autoBackup.storage.sourceData.size | quote }}
+      {{- if .Values.autoBackup.storage.sourceData.accessModes }}
+      accessModes:
+        {{- toYaml .Values.autoBackup.storage.sourceData.accessModes | nindent 8 }}
+      {{- else }}
+      accessModes:
+        {{- toYaml .Values.mssql.persistence.accessModes | nindent 8 }}
+      {{- end }}
+    backupData:
+      pvcName: {{ include "mssql-helm.backupPVCName" . }}
+      storageClassName: {{ default .Values.mssql.persistence.storageClass .Values.autoBackup.storage.backupData.storageClassName | quote }}
+      size: {{ .Values.autoBackup.storage.backupData.size | quote }}
+      accessModes:
+        {{- toYaml .Values.autoBackup.storage.backupData.accessModes | nindent 8 }}
+    targetData:
+      storageClassName: {{ default .Values.mssql.persistence.storageClass .Values.autoBackup.storage.targetData.storageClassName | quote }}
+      size: {{ .Values.autoBackup.storage.targetData.size | quote }}
+      accessModes:
+        {{- toYaml .Values.autoBackup.storage.targetData.accessModes | nindent 8 }}
+  {{- if and (ne .Values.autoBackup.mode "local_pvc") .Values.autoBackup.destination.endpoint .Values.autoBackup.destination.bucket .Values.autoBackup.destination.prefix .Values.autoBackup.destination.secretRefName }}
+  destination:
+    endpoint: {{ .Values.autoBackup.destination.endpoint | quote }}
+    bucket: {{ .Values.autoBackup.destination.bucket | quote }}
+    prefix: {{ .Values.autoBackup.destination.prefix | quote }}
+    secretRef:
+      name: {{ .Values.autoBackup.destination.secretRefName | quote }}
+    tls:
+      insecureSkipVerify: {{ .Values.autoBackup.destination.insecureSkipVerify }}
+  {{- end }}
+{{- end }}

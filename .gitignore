@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Temp / artifacts
+*.log
+tmp/
+artifacts/
+
+# Kubernetes render output
+*.rendered.yaml

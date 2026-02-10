@@ -1,0 +1,84 @@
+nameOverride: ""
+fullnameOverride: ""
+
+mssql:
+  enabled: true
+  image:
+    repository: mcr.microsoft.com/mssql/server
+    tag: 2022-latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 1433
+  auth:
+    existingSecret: ""
+    secretName: ""
+    saPasswordKey: SA_PASSWORD
+    saPassword: "ChangeThis!StrongP@ssw0rd"
+  resources: {}
+  persistence:
+    storageClass: ""
+    size: 50Gi
+    accessModes:
+      - ReadWriteOnce
+
+operator:
+  enabled: false
+  image:
+    repository: mssql-operator-mvp
+    tag: latest
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: false
+    name: ""
+  rbac:
+    create: false
+  reconcileIntervalSeconds: 20
+  executor:
+    image: mssql-backup-executor
+    tag: latest
+    pullPolicy: IfNotPresent
+
+autoBackup:
+  enabled: true
+  instanceName: ""
+  allDatabases: true
+  databases: []
+  retentionDays: 30
+  fullBackupSchedule: "0 0 * * *"
+  logBackupIntervalMinutes: 5
+  mode: local_pvc
+  dryRun: false
+  targets:
+    rpoTarget: 5m
+    rtoTarget: 1m
+  storage:
+    # legacy/global switch kept for backward compatibility in operator
+    managePVC: false
+    # clean ownership model:
+    # - source PVC owned by Helm StatefulSet
+    # - backup/target PVC owned by operator
+    manageSourcePVC: false
+    manageBackupPVC: true
+    manageTargetPVC: true
+    sourceData:
+      pvcName: ""
+      storageClassName: ""
+      size: ""
+      accessModes: []
+    backupData:
+      pvcName: ""
+      storageClassName: ""
+      size: 100Gi
+      accessModes:
+        - ReadWriteOnce
+    targetData:
+      storageClassName: ""
+      size: 50Gi
+      accessModes:
+        - ReadWriteOnce
+  destination:
+    endpoint: ""
+    bucket: ""
+    prefix: ""
+    secretRefName: ""
+    insecureSkipVerify: false
