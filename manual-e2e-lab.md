@@ -38,6 +38,15 @@ kubectl apply -f ./crd/mssqlrestorejob-crd.yaml
 kubectl get crd | rg mssql
 ```
 
+### 3.1) (Optional) Prepare local images for kind
+
+ใช้ขั้นตอนนี้เมื่อทดสอบแบบ local และ image ไม่ได้อยู่ใน registry:
+
+```bash
+kind load docker-image --name mssql-lab mssql-operator-mvp:rt-e2e3
+kind load docker-image --name mssql-lab mssql-backup-executor:rt-e2e
+```
+
 ## 4) ลง operator (แบบผู้ทดสอบ)
 
 วิธีง่ายสุด: ใช้ Helm แบบ bundled operator
@@ -51,8 +60,10 @@ helm upgrade --install mssql-src ./helm/mssql-helm \
   --set mssql.persistence.storageClass=standard \
   --set operator.image.repository=mssql-operator-mvp \
   --set operator.image.tag=rt-e2e3 \
+  --set operator.image.pullPolicy=IfNotPresent \
   --set operator.executor.image=mssql-backup-executor \
-  --set operator.executor.tag=rt-e2e
+  --set operator.executor.tag=rt-e2e \
+  --set operator.executor.pullPolicy=IfNotPresent
 ```
 
 ## 5) รอ source พร้อม
@@ -60,12 +71,14 @@ helm upgrade --install mssql-src ./helm/mssql-helm \
 ```bash
 kubectl -n dbaas-mssql get pods,sts,svc
 kubectl -n dbaas-mssql get mssqlinstance,mssqlbackuppolicies,cronjobs,pvc
+kubectl -n dbaas-mssql describe pod -l app.kubernetes.io/component=operator
 ```
 
 ต้องเห็น:
 - Pod MSSQL = `Running`
 - Pod operator = `Running`
 - มี `MSSQLInstance` และ `MSSQLBackupPolicy` ถูกสร้างแล้ว
+- ถ้า operator เป็น `ImagePullBackOff` ให้แก้ image/registry ก่อนทำ step ถัดไป
 
 ## 6) Insert data ฝั่ง source
 
@@ -184,8 +197,19 @@ spec:
     size: 50Gi
     accessModes: ["ReadWriteOnce"]
 EOFYAML
+kubectl -n dbaas-mssql get mssqlrestorerequests
+kubectl -n dbaas-mssql get mssqlrestorejobs
+```
 
-kubectl -n dbaas-mssql get mssqlrestorerequests,mssqlrestorejobs -w
+หมายเหตุ: บาง kubectl ไม่รองรับ `-w` กับหลาย resource type ในคำสั่งเดียว  
+ให้ใช้ 2 terminal แยกกัน:
+
+```bash
+kubectl -n dbaas-mssql get mssqlrestorerequests -w
+```
+
+```bash
+kubectl -n dbaas-mssql get mssqlrestorejobs -w
 ```
 
 ## 12) Validate หลัง restore

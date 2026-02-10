@@ -22,6 +22,7 @@ This repository is prepared for Core team handover in a CNPG-style operator mode
 - Current PITR flow expects target MSSQL instance to exist before restore request
 - RTO 1-minute target still requires repeated measurements in production-like load
 - Core-managed RBAC must be provided before operator reconciliation can run successfully
+- Operator and executor images must be reachable by the cluster runtime (local load or internal registry)
 
 ## 4) Planned next tests
 - High-concurrency backup/restore stress test
@@ -48,6 +49,63 @@ helm upgrade --install mssql-src ./helm/mssql-helm \
   -f ./helm/mssql-helm/values-core-managed.yaml \
   --set mssql.image.tag=2022-latest \
   --set mssql.persistence.storageClass=standard
+```
+
+## Image Pull Strategy (important)
+Use one of these two modes before running PITR:
+
+1. `kind/local lab` mode
+- Build/load images into kind and force `pullPolicy=Never`
+- Example:
+```bash
+kind load docker-image --name mssql-lab mssql-operator-mvp:rt-e2e3
+kind load docker-image --name mssql-lab mssql-backup-executor:rt-e2e
+
+helm upgrade --install mssql-src ./helm/mssql-helm \
+  -n dbaas-mssql \
+  -f ./helm/mssql-helm/values-bundled-operator.yaml \
+  --set operator.image.repository=mssql-operator-mvp \
+  --set operator.image.tag=rt-e2e3 \
+  --set operator.image.pullPolicy=Never \
+  --set operator.executor.image=mssql-backup-executor \
+  --set operator.executor.tag=rt-e2e \
+  --set operator.executor.pullPolicy=Never
+```
+
+2. `core/prod` internal registry mode (recommended)
+- Push both images to internal registry and use immutable tags
+- Suggested naming:
+- `registry.internal/dbaas/mssql-operator-mvp:<version>`
+- `registry.internal/dbaas/mssql-backup-executor:<version>`
+- Example:
+```bash
+helm upgrade --install mssql-src ./helm/mssql-helm \
+  -n dbaas-mssql \
+  -f ./helm/mssql-helm/values-bundled-operator.yaml \
+  --set operator.image.repository=registry.internal/dbaas/mssql-operator-mvp \
+  --set operator.image.tag=v0.1.0 \
+  --set operator.executor.image=registry.internal/dbaas/mssql-backup-executor \
+  --set operator.executor.tag=v0.1.0
+```
+- Ensure image pull secret exists and is bound to service accounts used by operator and jobs.
+- Example:
+```bash
+kubectl -n dbaas-mssql create secret docker-registry regcred \
+  --docker-server=registry.internal \
+  --docker-username=<user> \
+  --docker-password=<password>
+
+kubectl -n dbaas-mssql patch serviceaccount mssql-src-mssql-helm-operator \
+  -p '{\"imagePullSecrets\":[{\"name\":\"regcred\"}]}'
+kubectl -n dbaas-mssql patch serviceaccount default \
+  -p '{\"imagePullSecrets\":[{\"name\":\"regcred\"}]}'
+```
+
+## Image Pull Preflight
+```bash
+kubectl -n dbaas-mssql get pods
+kubectl -n dbaas-mssql describe pod -l app.kubernetes.io/component=operator
+kubectl -n dbaas-mssql get events --sort-by=.metadata.creationTimestamp | tail -n 20
 ```
 
 ## Required tenant inputs

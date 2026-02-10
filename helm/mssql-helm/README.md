@@ -37,6 +37,48 @@ helm upgrade --install mssql-src ./helm/mssql-helm \
   --set operator.executor.tag=latest
 ```
 
+## Image Pull Reliability
+If operator pod is `ImagePullBackOff`, use one of these patterns:
+
+1. `kind/local`:
+```bash
+kind load docker-image --name mssql-lab mssql-operator-mvp:rt-e2e3
+kind load docker-image --name mssql-lab mssql-backup-executor:rt-e2e
+
+helm upgrade --install mssql-src ./helm/mssql-helm \
+  -n dbaas-mssql \
+  -f ./helm/mssql-helm/values-bundled-operator.yaml \
+  --set operator.image.repository=mssql-operator-mvp \
+  --set operator.image.tag=rt-e2e3 \
+  --set operator.image.pullPolicy=Never \
+  --set operator.executor.image=mssql-backup-executor \
+  --set operator.executor.tag=rt-e2e \
+  --set operator.executor.pullPolicy=Never
+```
+
+2. `internal registry` (production path):
+```bash
+helm upgrade --install mssql-src ./helm/mssql-helm \
+  -n dbaas-mssql \
+  -f ./helm/mssql-helm/values-bundled-operator.yaml \
+  --set operator.image.repository=registry.internal/dbaas/mssql-operator-mvp \
+  --set operator.image.tag=v0.1.0 \
+  --set operator.executor.image=registry.internal/dbaas/mssql-backup-executor \
+  --set operator.executor.tag=v0.1.0
+```
+Then configure image pull secrets for the namespace/service accounts:
+```bash
+kubectl -n dbaas-mssql create secret docker-registry regcred \
+  --docker-server=registry.internal \
+  --docker-username=<user> \
+  --docker-password=<password>
+
+kubectl -n dbaas-mssql patch serviceaccount mssql-src-mssql-helm-operator \
+  -p '{"imagePullSecrets":[{"name":"regcred"}]}'
+kubectl -n dbaas-mssql patch serviceaccount default \
+  -p '{"imagePullSecrets":[{"name":"regcred"}]}'
+```
+
 ## Key values
 - `mssql.image.tag`: MSSQL engine tag (recommend `2022-latest`)
 - `mssql.persistence.storageClass`: source data storage class
@@ -54,6 +96,7 @@ helm upgrade --install mssql-src ./helm/mssql-helm \
 kubectl -n dbaas-mssql get sts,svc,pods
 kubectl -n dbaas-mssql get mssqlinstance,mssqlbackuppolicies,cronjobs,mssqlbackups
 kubectl -n dbaas-mssql get pvc
+kubectl -n dbaas-mssql describe pod -l app.kubernetes.io/component=operator
 ```
 
 ## Notes

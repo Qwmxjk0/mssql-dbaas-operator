@@ -33,6 +33,7 @@ UNKNOWN:
 - Core operator is running in target namespace.
 - MSSQL SA password secret is present or provided through Helm values.
 - Executor image includes required tooling (`sqlcmd`, backup/restore scripts).
+- Operator and executor images are reachable by cluster nodes (internal registry or preloaded images).
 
 ## 4) Test matrix
 | Case | Deployment Mode | Expected |
@@ -64,11 +65,14 @@ helm upgrade --install mssql-src ./helm/mssql-helm \
 ```bash
 kubectl -n dbaas-mssql get sts,svc,secret,pvc
 kubectl -n dbaas-mssql get mssqlinstance,mssqlbackuppolicies,cronjobs
+kubectl -n dbaas-mssql get pods
+kubectl -n dbaas-mssql describe pod -l app.kubernetes.io/component=operator
 ```
 Checklist:
 - [ ] Source PVC is created by StatefulSet.
 - [ ] Backup/target PVC is managed by operator according to spec.
 - [ ] No ownership conflict errors in operator logs.
+- [ ] No `ImagePullBackOff`/`ErrImagePull` on operator pod.
 
 ### Step D: Backup and PITR validation
 - Seed data into multiple DBs (`db1`, `db2`, `db3`).

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.1 - 2026-02-10
+- Added image pull troubleshooting and deployment guidance (kind load vs internal registry)
+- Updated manual E2E runbook with operator preflight checks
+- Updated production gates to include registry/image-pull controls
+
 ## v0.1.0 - 2026-02-10
 - Initial public handover package for Core team
 - Added MSSQL CRDs for backup/PITR flow

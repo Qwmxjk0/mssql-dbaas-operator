@@ -30,6 +30,9 @@ Status: Release gate checklist for Core handover
 - [ ] RBAC preflight passes (`kubectl auth can-i`) for operator service account
 - [ ] StorageClass for source/backup/target PVC is available and healthy
 - [ ] Image tags pinned (no floating tag in production)
+- [ ] Internal registry path is configured for operator + executor images
+- [ ] Image pull secret is configured for service accounts used by operator/jobs
+- [ ] No `ImagePullBackOff` / `ErrImagePull` in namespace before PITR test
 - [ ] Resource limits/requests set for MSSQL + operator + executor jobs
 - [ ] Alerting configured for failed cronjobs and failed restore jobs
 - [ ] Runbook validated by a second engineer (peer validation)
