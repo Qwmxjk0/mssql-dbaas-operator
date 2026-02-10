@@ -1,11 +1,11 @@
-1. ตรวจ resource หลังติดตั้ง
+1. Check resources after installation
    kubectl -n {{ .Release.Namespace }} get sts,svc,deploy,mssqlinstances,mssqlbackuppolicies,cronjobs
 
-2. ตรวจ source PVC และ backup PVC
+2. Check source PVC and backup PVC
    kubectl -n {{ .Release.Namespace }} get pvc | grep -E '{{ include "mssql-helm.dbName" . }}|{{ include "mssql-helm.instanceName" . }}'
 
-3. ตรวจ status ของ MSSQLInstance
+3. Check MSSQLInstance status
    kubectl -n {{ .Release.Namespace }} get mssqlinstance {{ include "mssql-helm.instanceName" . }} -o yaml
 
-4. ถ้าใช้ Core-managed RBAC ให้ตั้ง
+4. If using Core-managed RBAC, set
    --set operator.serviceAccount.create=false --set operator.rbac.create=false
