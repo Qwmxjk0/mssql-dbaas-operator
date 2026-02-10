@@ -35,7 +35,7 @@ Status: Release gate checklist for Core handover
 - [ ] Runbook validated by a second engineer (peer validation)
 
 ## Evidence artifacts required
-- [ ] `tests/07-metrics-go-no-go.md` updated for current run
+- [ ] `tests/metrics-go-no-go.md` updated for current run
 - [ ] Source/target data validation outputs attached
 - [ ] `kubectl get` snapshots attached (pods, crds, crs, jobs, pvc)
 - [ ] Operator logs for backup + restore windows attached

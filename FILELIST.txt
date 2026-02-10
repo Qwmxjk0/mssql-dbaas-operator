@@ -10,11 +10,11 @@ crd/mssqlbackuppolicy-crd.yaml
 crd/mssqlinstance-crd.yaml
 crd/mssqlrestorejob-crd.yaml
 crd/mssqlrestorerequest-crd.yaml
-docs/MSSQL-Core-Migration-Test-Runbook.md
-docs/MSSQL-operator-rbac-contract-th.md
-docs/MSSQL-production-gates-checklist.md
 docs/README.md
-docs/UI-Field-by-Field-Spec.md
+docs/mssql-core-migration-test-runbook.md
+docs/mssql-operator-rbac-contract.th.md
+docs/mssql-production-gates-checklist.md
+docs/ui-field-by-field-spec.md
 helm/mssql-helm/Chart.yaml
 helm/mssql-helm/README.md
 helm/mssql-helm/templates/NOTES.txt
@@ -29,7 +29,7 @@ helm/mssql-helm/values-bundled-operator.yaml
 helm/mssql-helm/values-core-managed.yaml
 helm/mssql-helm/values.yaml
 manual-e2e-lab.md
-tests/06a-source-validation.txt
-tests/06b-target-validation.txt
-tests/07-metrics-go-no-go.md
-tests/16-runtime-e2e-core-managed-localpvc-run.md
+tests/metrics-go-no-go.md
+tests/runtime-e2e-core-managed-local-pvc.md
+tests/source-validation.txt
+tests/target-validation.txt

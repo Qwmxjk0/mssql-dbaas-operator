@@ -73,7 +73,7 @@ UNKNOWN:
 - [x] `RPO <= 5m` (จริง = 99s)
 
 Metrics อ้างอิง:
-- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/07-metrics-go-no-go.md`
+- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/metrics-go-no-go.md`
 
 ## 7) Evidence Artifacts
 - `docs/mssql/tests/artifacts/core-migration-20260210-runtime/04g-full-backup-final.txt`
@@ -82,9 +82,9 @@ Metrics อ้างอิง:
 - `docs/mssql/tests/artifacts/core-migration-20260210-runtime/05b-restore-request-run.txt`
 - `docs/mssql/tests/artifacts/core-migration-20260210-runtime/05d-restore-job-log.txt`
 - `docs/mssql/tests/artifacts/core-migration-20260210-runtime/05g-backup-store-files.txt`
-- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/06a-source-validation.txt`
-- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/06b-target-validation.txt`
-- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/07-metrics-go-no-go.md`
+- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/source-validation.txt`
+- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/target-validation.txt`
+- `docs/mssql/tests/artifacts/core-migration-20260210-runtime/metrics-go-no-go.md`
 - `docs/mssql/tests/artifacts/core-migration-20260210-runtime/08-cleanup-after-run.txt`
 
 ## 8) Go / No-Go

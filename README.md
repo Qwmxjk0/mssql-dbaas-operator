@@ -63,14 +63,14 @@ helm upgrade --install mssql-src ./helm/mssql-helm \
 
 ## Key documents
 - `docs/README.md`
-- `docs/MSSQL-operator-rbac-contract-th.md`
-- `docs/MSSQL-Core-Migration-Test-Runbook.md`
-- `docs/MSSQL-production-gates-checklist.md`
-- `docs/UI-Field-by-Field-Spec.md`
+- `docs/mssql-operator-rbac-contract.th.md`
+- `docs/mssql-core-migration-test-runbook.md`
+- `docs/mssql-production-gates-checklist.md`
+- `docs/ui-field-by-field-spec.md`
 - `manual-e2e-lab.md`
 
 ## Evidence
-- `tests/16-runtime-e2e-core-managed-localpvc-run.md`
-- `tests/07-metrics-go-no-go.md`
-- `tests/06a-source-validation.txt`
-- `tests/06b-target-validation.txt`
+- `tests/runtime-e2e-core-managed-local-pvc.md`
+- `tests/metrics-go-no-go.md`
+- `tests/source-validation.txt`
+- `tests/target-validation.txt`
